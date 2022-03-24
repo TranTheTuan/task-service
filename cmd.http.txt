@@ -1,0 +1,74 @@
+import (
+    pbRunTime "github.com/grpc-ecosystem/grpc-gateway/runtime"
+    "google.golang.org/grpc"
+)
+
+	go func() {
+		jsonpb := &gateway.JSONPb{
+			EmitDefaults: true,
+			Indent:       "  ",
+			OrigName:     true,
+		}
+		pbMux := pbRunTime.NewServeMux(
+			pbRunTime.WithMarshalerOption(pbRunTime.MIMEWildcard, jsonpb),
+			// This is necessary to get error details properly
+			// marshaled in unary requests.
+			pbRunTime.WithProtoErrorHandler(pbRunTime.DefaultHTTPProtoErrorHandler),
+		)
+		opts := []grpc.DialOption{grpc.WithInsecure()}
+		backend := viper.GetString(SystemGrpcBackend)
+
+		// RegisterBackorderService
+		err = polar_bear.RegisterSettingAPIHandlerFromEndpoint(ctx, pbMux, backend, opts)
+		if err != nil {
+			panic(err)
+		}
+
+		httpMux := http.NewServeMux()
+		restAddr := viper.GetString(SystemGRPCGatewayAddr)
+		// Route register
+
+		httpMux.HandleFunc("/version", func(w http.ResponseWriter, req *http.Request) {
+			b, _ := strconv.ParseInt(BuiltAt, 10, 64)
+			o := time.Unix(b, 0)
+			type ModuleVersion struct {
+				Module    string
+				Version   string
+				GitCommit string
+				Built     string
+			}
+			var mVersion = ModuleVersion{
+				Module:    "PolarBear",
+				Version:   Version,
+				GitCommit: GitCommitHash,
+				Built:     o.String(),
+			}
+			js, err := json.Marshal(mVersion)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write(js)
+		})
+		httpMux.Handle("/", pbMux)
+		// Config cors
+		httpHandler := cors.AllowAll().Handler(httpMux)
+
+		srv := &http.Server{
+			Addr:         restAddr,
+			Handler:      httpHandler,
+			IdleTimeout:  60 * time.Second,
+			ReadTimeout:  15 * time.Second,
+			WriteTimeout: 15 * time.Second,
+		}
+		smart_log.Logger.WithFields(log.Fields{
+			"service": "polar-bear",
+			"type":    "http",
+			"addr":    restAddr,
+		}).Infof("polar-bear GRPC gateway started")
+		err := srv.ListenAndServe()
+		if err != nil {
+			panic(err)
+		}
+	}()
