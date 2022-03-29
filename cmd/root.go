@@ -21,7 +21,10 @@ const (
 	MySQLMaxOpenConnections = "system-mysql-max-open-conns"
 	MySQLMaxIdleConnections = "system-mysql-max-idle-conns"
 
-	RBACFilePath = "system-rbac-file-path"
+	RBACFilePath          = "system-rbac-file-path"
+	AuthGrpcAddr          = "system-auth-grpc-addr"
+	SystemGrpcAddr        = "system-grpc-addr"
+	SystemGRPCGatewayAddr = "system-grpc-gw-addr"
 )
 
 var cfgFile string
@@ -79,7 +82,7 @@ func initConfiguration() {
 
 	rootCmd.PersistentFlags().String(MySQLUserName, "root", "mysql username")
 	rootCmd.PersistentFlags().String(MySQLPassword, "", "mysql password")
-	rootCmd.PersistentFlags().String(MySQLDatabase, "authentication", "mysql database name")
+	rootCmd.PersistentFlags().String(MySQLDatabase, "task_service", "mysql database name")
 	rootCmd.PersistentFlags().String(MySQLHost, "127.0.0.1", "mysql host")
 	rootCmd.PersistentFlags().String(MySQLPort, "3306", "mysql port")
 	rootCmd.PersistentFlags().String(MySQLCharset, "utf8mb4", "mysql default database character set. Recommend utf8mb4 for better Unicode support")
@@ -88,6 +91,9 @@ func initConfiguration() {
 	rootCmd.PersistentFlags().String(MySQLMaxIdleConnections, "2", "mysql SetMaxIdleConns")
 
 	rootCmd.PersistentFlags().String(RBACFilePath, "cmd/config/rbac.conf", "rbac config file path")
+	rootCmd.PersistentFlags().String(AuthGrpcAddr, ":8080", "address of auth grpc server")
+	rootCmd.PersistentFlags().String(SystemGrpcAddr, ":9090", "address of auth grpc server")
+	rootCmd.PersistentFlags().String(SystemGRPCGatewayAddr, ":9091", "address of auth grpc server")
 
 	//Bind flags to viper
 	_ = viper.BindPFlag("system-mode", rootCmd.PersistentFlags().Lookup("system-mode"))
@@ -104,4 +110,7 @@ func initConfiguration() {
 	_ = viper.BindPFlag(MySQLMaxIdleConnections, rootCmd.PersistentFlags().Lookup(MySQLMaxIdleConnections))
 
 	_ = viper.BindPFlag(RBACFilePath, rootCmd.PersistentFlags().Lookup(RBACFilePath))
+	_ = viper.BindPFlag(AuthGrpcAddr, rootCmd.PersistentFlags().Lookup(AuthGrpcAddr))
+	_ = viper.BindPFlag(SystemGrpcAddr, rootCmd.PersistentFlags().Lookup(SystemGrpcAddr))
+	_ = viper.BindPFlag(SystemGRPCGatewayAddr, rootCmd.PersistentFlags().Lookup(SystemGRPCGatewayAddr))
 }

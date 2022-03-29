@@ -10,6 +10,10 @@ var serveCmd = &cobra.Command{
 	Run:   runServeCmd,
 }
 
+func init() {
+	rootCmd.AddCommand(serveCmd)
+}
+
 func runServeCmd(cmd *cobra.Command, args []string) {
 	err := cmd.Help()
 	if err != nil {

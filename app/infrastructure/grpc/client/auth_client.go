@@ -6,18 +6,19 @@ import (
 	pbAuth "github.com/TranTheTuan/pbtypes/build/go/auth"
 	"github.com/TranTheTuan/task-service/app/domain/dto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type AuthClient struct {
 	authClient pbAuth.AuthorizeServiceClient
 }
 
-func NewAuthClient() (*AuthClient, error) {
-	conn, err := grpc.Dial("", []grpc.DialOption{})
+func NewAuthClient(authClientAddr string) (*AuthClient, error) {
+	conn, err := grpc.Dial(authClientAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
-	defer conn.Close()
+	// defer conn.Close()
 
 	client := pbAuth.NewAuthorizeServiceClient(conn)
 	return &AuthClient{client}, nil
@@ -27,7 +28,7 @@ func (a *AuthClient) Authorize(ctx context.Context, in *dto.AuthorizeDTO) (bool,
 	res, err := a.authClient.Authorize(ctx, &pbAuth.AuthorizeRequest{
 		CasbinUser: in.CasbinUser,
 		RequestUri: in.RequestURI,
-		Method: in.Method,
+		Method:     in.Method,
 	})
 	if err != nil {
 		return false, err

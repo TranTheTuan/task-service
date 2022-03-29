@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -8,11 +9,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/jinzhu/gorm"
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+
+	pbTasks "github.com/TranTheTuan/pbtypes/build/go/tasks"
 )
 
 var httpCmd = &cobra.Command{
@@ -44,37 +49,37 @@ func runServeHTTPCmd(cmd *cobra.Command, args []string) {
 	orm.DB().SetConnMaxLifetime(200 * time.Minute)
 
 	go func() {
-		// casbin.InitFromSQLLite(orm, viper.GetString(RBACFilePath))
-		// pubsub.InitPubSub(orm)
+		gwMux := runtime.NewServeMux(
+			runtime.WithMetadata(func(ctx context.Context, r *http.Request) metadata.MD {
+				md := make(map[string]string)
+				if method, ok := runtime.RPCMethod(ctx); ok {
+					md["method"] = method // /grpc.gateway.examples.internal.proto.examplepb.LoginService/Login
+				}
+				if pattern, ok := runtime.HTTPPathPattern(ctx); ok {
+					md["pattern"] = pattern // /v1/example/login
+				}
+				return metadata.New(md)
+			}),
+		)
+		opts := []grpc.DialOption{grpc.WithInsecure()}
+		grpcAddr := viper.GetString(SystemGrpcAddr)
 
-		// userRepo := repository.NewUserRepository(orm)
-		// userService := service.NewUserService(userRepo)
-		// userUsecase := usecase.NewUserUsecase(userService)
-		// authorUsecase := usecase.NewAuthorUsecase()
-		// authHandler := httpHandler.NewAuthHandler(userUsecase, authorUsecase)
-
-		router := mux.NewRouter().PathPrefix("/v1/auth/").Subrouter()
-		// router.Use(pubsub.EventDispatcherMiddleware)
-		// router.HandleFunc("/login", authHandler.Login).Methods("POST")
-		// router.HandleFunc("/register", authHandler.Register).Methods("POST")
-
-		// router1 := mux.NewRouter().PathPrefix("/v1/tasks/").Subrouter()
-		// router1.HandleFunc("/{id:[0-9]+}", authHandler.TestAuthorize).Methods("POST")
+		err = pbTasks.RegisterTaskServiceHandlerFromEndpoint(context.Background(), gwMux, grpcAddr, opts)
 
 		httpMux := http.NewServeMux()
-		httpMux.Handle("/v1/tasks/", router)
-
+		httpMux.Handle("/", gwMux)
+		gwAddr := viper.GetString(SystemGRPCGatewayAddr)
 		httpHandler := cors.AllowAll().Handler(httpMux)
 
 		srv := &http.Server{
-			Addr:         ":8080",
+			Addr:         gwAddr,
 			Handler:      httpHandler,
 			IdleTimeout:  60 * time.Second,
 			ReadTimeout:  15 * time.Second,
 			WriteTimeout: 15 * time.Second,
 		}
-		logger.Print("server started")
-		err = srv.ListenAndServe()
+		logger.Println("Serving gRPC gateway on 0.0.0.0:9091")
+		err := srv.ListenAndServe()
 		if err != nil {
 			panic(err)
 		}
