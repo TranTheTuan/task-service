@@ -73,9 +73,9 @@ func (repo *TaskRepository) CreateTask(ctx context.Context, task *models.Task) e
 }
 
 func (repo *TaskRepository) UpdateTask(ctx context.Context, task *models.Task) error {
-	return repo.db.Model(&models.Task{}).Update(task).Error
+	return repo.db.Model(&models.Task{}).Where("user_id = ?", task.UserID).Update(task).Error
 }
 
 func (repo *TaskRepository) DeleteTaskByID(ctx context.Context, userID, taskID uint32) error {
-	return repo.db.Model(&models.Task{}).Where("user_id", userID).Delete(&models.Task{}).Error
+	return repo.db.Model(&models.Task{}).Where("id = ? AND user_id = ?", taskID, userID).Delete(&models.Task{}).Error
 }

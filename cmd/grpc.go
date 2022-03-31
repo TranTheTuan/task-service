@@ -19,11 +19,7 @@ import (
 	"google.golang.org/grpc"
 
 	pbTasks "github.com/TranTheTuan/pbtypes/build/go/tasks"
-	"github.com/TranTheTuan/task-service/app/domain/service"
-	"github.com/TranTheTuan/task-service/app/domain/usecase"
-	internalGrpc "github.com/TranTheTuan/task-service/app/infrastructure/grpc"
-	"github.com/TranTheTuan/task-service/app/infrastructure/grpc/client"
-	"github.com/TranTheTuan/task-service/app/infrastructure/repository"
+	"github.com/TranTheTuan/task-service/wire"
 )
 
 var grpcCmd = &cobra.Command{
@@ -59,12 +55,10 @@ func runServeGRPCCmd(cmd *cobra.Command, args []string) {
 	orm.LogMode(true)
 
 	go func() {
-		authClient, err := client.NewAuthClient(viper.GetString(AuthGrpcAddr))
+		authUsecase, err := wire.InitAuthUsecase(viper.GetString(AuthGrpcAddr))
 		if err != nil {
 			panic(err)
 		}
-		authUsecase := usecase.NewAuthUsecase(authClient)
-
 		grpcServer := grpc.NewServer(
 			grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 				grpc_logrus.UnaryServerInterceptor(lgg),
@@ -72,10 +66,7 @@ func runServeGRPCCmd(cmd *cobra.Command, args []string) {
 			)),
 		)
 
-		taskRepo := repository.NewTaskRepository(orm)
-		taskService := service.NewTaskService(taskRepo)
-		taskUsecase := usecase.NewTaskUsecase(taskService)
-		taskServiceServer := internalGrpc.NewTaskServiceServer(taskUsecase)
+		taskServiceServer := wire.InitTaskServiceServer(orm)
 
 		pbTasks.RegisterTaskServiceServer(grpcServer, taskServiceServer)
 
