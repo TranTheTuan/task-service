@@ -10,7 +10,8 @@ import (
 )
 
 type AuthClient struct {
-	authClient pbAuth.AuthorizeServiceClient
+	authorizeClient pbAuth.AuthAuthorizeServiceClient
+	verifyClient pbAuth.AuthVerifyServiceClient
 }
 
 func NewAuthClient(authClientAddr string) (*AuthClient, error) {
@@ -20,12 +21,13 @@ func NewAuthClient(authClientAddr string) (*AuthClient, error) {
 	}
 	// defer conn.Close()
 
-	client := pbAuth.NewAuthorizeServiceClient(conn)
-	return &AuthClient{client}, nil
+	authorizeClient := pbAuth.NewAuthAuthorizeServiceClient(conn)
+	verifyClient := pbAuth.NewAuthVerifyServiceClient(conn)
+	return &AuthClient{authorizeClient, verifyClient}, nil
 }
 
 func (a *AuthClient) Authorize(ctx context.Context, in *dto.AuthorizeDTO) (bool, error) {
-	res, err := a.authClient.Authorize(ctx, &pbAuth.AuthorizeRequest{
+	res, err := a.authorizeClient.Authorize(ctx, &pbAuth.AuthorizeRequest{
 		CasbinUser: in.CasbinUser,
 		RequestUri: in.RequestURI,
 		Method:     in.Method,
@@ -37,7 +39,7 @@ func (a *AuthClient) Authorize(ctx context.Context, in *dto.AuthorizeDTO) (bool,
 }
 
 func (a *AuthClient) VerifyToken(ctx context.Context, token string) (uint32, error) {
-	res, err := a.authClient.VerifyToken(ctx, &pbAuth.VerifyTokenRequest{Token: token})
+	res, err := a.verifyClient.VerifyToken(ctx, &pbAuth.VerifyTokenRequest{Token: token})
 	if err != nil {
 		return 0, err
 	}

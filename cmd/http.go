@@ -64,7 +64,26 @@ func runServeHTTPCmd(cmd *cobra.Command, args []string) {
 		opts := []grpc.DialOption{grpc.WithInsecure()}
 		grpcAddr := viper.GetString(SystemGrpcAddr)
 
-		err = pbTasks.RegisterTaskServiceHandlerFromEndpoint(context.Background(), gwMux, grpcAddr, opts)
+		err = pbTasks.RegisterTaskCreateServiceHandlerFromEndpoint(context.Background(), gwMux, grpcAddr, opts)
+		if err != nil {
+			panic(err)
+		}
+		err = pbTasks.RegisterTaskUpdateServiceHandlerFromEndpoint(context.Background(), gwMux, grpcAddr, opts)
+		if err != nil {
+			panic(err)
+		}
+		err = pbTasks.RegisterTaskDeleteServiceHandlerFromEndpoint(context.Background(), gwMux, grpcAddr, opts)
+		if err != nil {
+			panic(err)
+		}
+		err = pbTasks.RegisterTaskGetAllServiceHandlerFromEndpoint(context.Background(), gwMux, grpcAddr, opts)
+		if err != nil {
+			panic(err)
+		}
+		err = pbTasks.RegisterTaskGetByIDServiceHandlerFromEndpoint(context.Background(), gwMux, grpcAddr, opts)
+		if err != nil {
+			panic(err)
+		}
 
 		httpMux := http.NewServeMux()
 		httpMux.Handle("/", gwMux)
