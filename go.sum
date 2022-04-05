@@ -9,6 +9,10 @@ github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/TranTheTuan/pbtypes v0.0.0-20220330033749-d7acb80c1b7f h1:Ab6F2Qw7QqjvN5aK27pxNYe5L1vbcmvouHBaeuFMup8=
 github.com/TranTheTuan/pbtypes v0.0.0-20220330033749-d7acb80c1b7f/go.mod h1:T/vS2o1BadL5s1UQs4BZbZAwioI8kdnNwGqAEQ48OjA=
+github.com/TranTheTuan/pbtypes v0.0.0-20220405025128-b17b8cafab89 h1:jqMtoG5iAcoyi+JkEp/GbLeUMUR99oTEXXylNNHplFc=
+github.com/TranTheTuan/pbtypes v0.0.0-20220405025128-b17b8cafab89/go.mod h1:T/vS2o1BadL5s1UQs4BZbZAwioI8kdnNwGqAEQ48OjA=
+github.com/TranTheTuan/pbtypes v0.0.0-20220405032200-74ec6c011adc h1:KQMmwBFzgR3B+PfJxLjJmQOhDRIVjCUVomv9OqCi1cI=
+github.com/TranTheTuan/pbtypes v0.0.0-20220405032200-74ec6c011adc/go.mod h1:T/vS2o1BadL5s1UQs4BZbZAwioI8kdnNwGqAEQ48OjA=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=

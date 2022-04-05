@@ -68,7 +68,11 @@ func runServeGRPCCmd(cmd *cobra.Command, args []string) {
 
 		taskServiceServer := wire.InitTaskServiceServer(orm)
 
-		pbTasks.RegisterTaskServiceServer(grpcServer, taskServiceServer)
+		pbTasks.RegisterTaskCreateServiceServer(grpcServer, taskServiceServer)
+		pbTasks.RegisterTaskUpdateServiceServer(grpcServer, taskServiceServer)
+		pbTasks.RegisterTaskDeleteServiceServer(grpcServer, taskServiceServer)
+		pbTasks.RegisterTaskGetAllServiceServer(grpcServer, taskServiceServer)
+		pbTasks.RegisterTaskGetByIDServiceServer(grpcServer, taskServiceServer)
 
 		grpcAddr := viper.GetString(SystemGrpcAddr)
 		lis, err := net.Listen("tcp", grpcAddr)

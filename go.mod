@@ -3,7 +3,7 @@ module github.com/TranTheTuan/task-service
 go 1.18
 
 require (
-	github.com/TranTheTuan/pbtypes v0.0.0-20220330033749-d7acb80c1b7f
+	github.com/TranTheTuan/pbtypes v0.0.0-20220405032200-74ec6c011adc
 	github.com/go-gormigrate/gormigrate/v2 v2.0.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/wire v0.5.0

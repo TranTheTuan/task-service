@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	pbTasks "github.com/TranTheTuan/pbtypes/build/go/tasks"
+	"github.com/TranTheTuan/pbtypes/build/go/core"
 	"github.com/TranTheTuan/task-service/app/domain/dto"
 	"github.com/TranTheTuan/task-service/app/domain/models"
 	"github.com/TranTheTuan/task-service/app/domain/usecase"
@@ -15,7 +16,12 @@ import (
 
 type TaskServiceServer struct {
 	taskUsecase usecase.TaskUsecaseInterface
-	pbTasks.UnimplementedTaskServiceServer
+
+	pbTasks.UnimplementedTaskCreateServiceServer
+	pbTasks.UnimplementedTaskDeleteServiceServer
+	pbTasks.UnimplementedTaskGetAllServiceServer
+	pbTasks.UnimplementedTaskGetByIDServiceServer
+	pbTasks.UnimplementedTaskUpdateServiceServer
 }
 
 func NewTaskServiceServer(taskUsecase usecase.TaskUsecaseInterface) *TaskServiceServer {
@@ -38,7 +44,7 @@ func (t *TaskServiceServer) GetTasks(ctx context.Context, in *pbTasks.GetTasksRe
 		logger.WithError(err).Error("get tasks failed")
 		return nil, err
 	}
-	var protoTasks []*pbTasks.Task
+	var protoTasks []*core.Task
 	for _, task := range tasks {
 		protoTasks = append(protoTasks, task.ToProto())
 	}
