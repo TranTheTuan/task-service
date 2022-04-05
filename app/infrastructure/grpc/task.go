@@ -96,6 +96,7 @@ func (t *TaskServiceServer) UpdateTask(ctx context.Context, in *pbTasks.UpdateTa
 		Name:        in.Name,
 		Description: in.Description,
 	}
+	task.ID = uint(in.Id)
 	err := t.taskUsecase.UpdateTask(ctx, task)
 	if err != nil {
 		logger.WithError(err).Error("update task by id failed")
