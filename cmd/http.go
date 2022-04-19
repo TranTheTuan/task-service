@@ -20,6 +20,10 @@ import (
 	pbTasks "github.com/TranTheTuan/pbtypes/build/go/tasks"
 )
 
+const (
+	SystemServiceGrpcAddr = "system-service-grpc-addr"
+)
+
 var httpCmd = &cobra.Command{
 	Use:   "http",
 	Short: "start the back order service gateway",
@@ -27,6 +31,9 @@ var httpCmd = &cobra.Command{
 }
 
 func init() {
+	httpCmd.PersistentFlags().String(SystemServiceGrpcAddr, ":9090", "address of service task grpc server")
+
+	_ = viper.BindPFlag(SystemServiceGrpcAddr, httpCmd.PersistentFlags().Lookup(SystemServiceGrpcAddr))
 	serveCmd.AddCommand(httpCmd)
 }
 
@@ -62,7 +69,7 @@ func runServeHTTPCmd(cmd *cobra.Command, args []string) {
 			}),
 		)
 		opts := []grpc.DialOption{grpc.WithInsecure()}
-		grpcAddr := viper.GetString(SystemGrpcAddr)
+		grpcAddr := viper.GetString(SystemServiceGrpcAddr)
 
 		err = pbTasks.RegisterTaskCreateServiceHandlerFromEndpoint(context.Background(), gwMux, grpcAddr, opts)
 		if err != nil {

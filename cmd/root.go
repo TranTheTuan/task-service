@@ -61,11 +61,11 @@ func initConfig() {
 		}
 
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".authen")
-		viper.SetEnvPrefix("authen")
+		viper.SetConfigName(".task")
+		viper.SetEnvPrefix("task")
 	}
 
-	viper.SetEnvPrefix("authen")
+	viper.SetEnvPrefix("task")
 	replacer := strings.NewReplacer("-", "_")
 	viper.SetEnvKeyReplacer(replacer)
 	viper.AutomaticEnv()
