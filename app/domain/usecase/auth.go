@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/TranTheTuan/task-service/app/domain/dto"
@@ -55,7 +54,7 @@ func (a *AuthUsecase) AuthHandler(ctx context.Context) (context.Context, error) 
 		"pattern": pattern[0],
 		"method":  method[0],
 	}).Info("get pattern successfully")
-	pass, err := a.authClient.Authorize(ctx, &dto.AuthorizeDTO{
+	_, err = a.authClient.Authorize(ctx, &dto.AuthorizeDTO{
 		CasbinUser: fmt.Sprint(userID),
 		RequestURI: pattern[0],
 		Method:     method[0],
@@ -64,10 +63,10 @@ func (a *AuthUsecase) AuthHandler(ctx context.Context) (context.Context, error) 
 		logger.WithError(err).Error("authorize failed")
 		return nil, status.Errorf(codes.PermissionDenied, "Authorize error: %v", err)
 	}
-	if !pass {
-		logger.Error("unauthorized")
-		return nil, errors.New("unauthorized")
-	}
+	// if !pass {
+	// 	logger.Error("unauthorized")
+	// 	return nil, errors.New("unauthorized")
+	// }
 
 	ctx = context.WithValue(ctx, "UserID", userID)
 
