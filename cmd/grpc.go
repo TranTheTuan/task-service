@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -19,6 +18,7 @@ import (
 	"google.golang.org/grpc"
 
 	pbTasks "github.com/TranTheTuan/pbtypes/build/go/tasks"
+	"github.com/TranTheTuan/task-service/app/infrastructure/logger"
 	"github.com/TranTheTuan/task-service/wire"
 )
 
@@ -33,10 +33,10 @@ func init() {
 }
 
 func runServeGRPCCmd(cmd *cobra.Command, args []string) {
-	logger := log.Default()
-	lgg := logrus.WithFields(logrus.Fields{
+	logger := logger.NewLogger(logrus.Fields{
 		"auth_grpc_addr": viper.GetString(AuthGrpcAddr),
 	})
+	// defer closeFn()
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	d := initDB()
@@ -61,7 +61,7 @@ func runServeGRPCCmd(cmd *cobra.Command, args []string) {
 		}
 		grpcServer := grpc.NewServer(
 			grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-				grpc_logrus.UnaryServerInterceptor(lgg),
+				grpc_logrus.UnaryServerInterceptor(logger),
 				grpc_auth.UnaryServerInterceptor(authUsecase.AuthHandler),
 			)),
 		)
@@ -77,15 +77,15 @@ func runServeGRPCCmd(cmd *cobra.Command, args []string) {
 		grpcAddr := viper.GetString(SystemGrpcAddr)
 		lis, err := net.Listen("tcp", grpcAddr)
 		if err != nil {
-			logger.Fatalln("Failed to listen:", err)
+			logger.WithError(err).Fatalln("listen to grpc address failed")
 			panic(err)
 		}
-		logger.Println("Serving gRPC on 0.0.0.0:9090")
+		logger.Info("serving gRPC on 0.0.0.0:9090")
 		err = grpcServer.Serve(lis)
 		defer func() {
 			err = lis.Close()
 			if err != nil {
-				logger.Fatal(err)
+				logger.WithError(err).Error("close grpc server failed")
 			}
 		}()
 		if err != nil {
@@ -93,5 +93,5 @@ func runServeGRPCCmd(cmd *cobra.Command, args []string) {
 		}
 	}()
 	<-c
-	logger.Print("server graceful shutdown")
+	logger.Info("server graceful shutdown")
 }
